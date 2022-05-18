@@ -76,7 +76,7 @@ runcmd(struct cmd *cmd)
     /* MARK START task2
      * TAREFA2: Implemente codigo abaixo para executar
      * comandos simples. */
-    fprintf(stderr, "exec nao implementado\n");
+    execv(ecmd->argv[0], ecmd->argv);
     /* MARK END task2 */
     break;
 
@@ -130,7 +130,7 @@ main(void)
     if(buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' '){
       buf[strlen(buf)-1] = 0;
       if(chdir(buf+3) < 0)
-        fprintf(stderr, "reporte erro\n");
+        fprintf(stderr, "Não é possível acessar o diretório %s\n", buf+3);
       continue;
     }
     /* MARK END task1 */
