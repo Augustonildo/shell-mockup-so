@@ -8,9 +8,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
-/* MARK NAME Seu Nome Aqui */
-/* MARK NAME Nome de Outro Integrante Aqui */
-/* MARK NAME E Etc */
+/* Augusto Carvalho Porto Pereira: 2019054358 */
 
 /****************************************************************
  * Shell xv6 simplificado
@@ -76,7 +74,8 @@ runcmd(struct cmd *cmd)
     /* MARK START task2
      * TAREFA2: Implemente codigo abaixo para executar
      * comandos simples. */
-    execv(ecmd->argv[0], ecmd->argv);
+    execvp(ecmd->argv[0], ecmd->argv);
+    perror("execvp");
     /* MARK END task2 */
     break;
 
@@ -86,7 +85,12 @@ runcmd(struct cmd *cmd)
     /* MARK START task3
      * TAREFA3: Implemente codigo abaixo para executar
      * comando com redirecionamento. */
-    fprintf(stderr, "redir nao implementado\n");
+    close(rcmd->fd);
+    int openedFile = open(rcmd->file, rcmd->mode, S_IRWXU);
+    if (openedFile < 0) {
+        perror("open");
+        exit(0);
+    }
     /* MARK END task3 */
     runcmd(rcmd->cmd);
     break;
@@ -96,7 +100,36 @@ runcmd(struct cmd *cmd)
     /* MARK START task4
      * TAREFA4: Implemente codigo abaixo para executar
      * comando com pipes. */
-    fprintf(stderr, "pipe nao implementado\n");
+    int createdPipe = pipe(p);
+    if (createdPipe < 0) {
+        perror("pipe");
+        exit(0);
+    }
+
+    r = fork1();
+    if (r == 0) {
+        if (dup2(p[1], 1) < 0) {
+            perror("dupLeft");
+            exit(0);
+        }
+        close(p[0]);
+        close(p[1]);
+        runcmd(pcmd->left);
+    }
+
+    r = fork1();
+    if (r == 0) {
+        if (dup2(p[0], 0)) {
+            perror("dupRight");
+            exit(0);
+        }
+        close(p[0]);
+        close(p[1]);
+        runcmd(pcmd->right);
+    }
+    r = wait(NULL);
+    close(p[0]);
+    close(p[1]);
     /* MARK END task4 */
     break;
   }    
