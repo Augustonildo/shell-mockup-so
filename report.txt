@@ -19,12 +19,22 @@ Augusto Carvalho Porto Pereira <augustocarvalhopp@gmail.com> 100%
 
 - https://www.cplusplus.com/reference/cstdio/snprintf/
 - https://man7.org/linux/man-pages/man3/exec.3.html
+- https://linux.die.net/man/3/execvp
 - https://man7.org/linux/man-pages/man2/open.2.html
 - https://man7.org/linux/man-pages/man2/close.2.html
 - https://man7.org/linux/man-pages/man2/pipe.2.html
+- https://man7.org/linux/man-pages/man2/fork.2.html
 - https://www.delftstack.com/pt/howto/c/execvp-in-c/
+- https://www.ibm.com/docs/en/zos/2.1.0?topic=functions-mkdir-make-directory
 
 4. Estruturas de dados
 
-Descreva e justifique as estruturas de dados e algoritmos utilizados
-em sua solução.
+O esqueleto do sistema já se encontrava previamente estruturado como uma interface de chamadas de sistema, emulando um simples shell.
+    O arquivo fonte se divide entre o processamento das linhas de comando e os blocos de execução destes comandos. A seção de processamento de comandos já foi recebida pronta, contando com funções como por exemplo a getcmd e parsecmd.
+    Já a execução dos comandos foi toda construída sobre a função runcmd, responsável por realizar as ações determinadas pela leitura do cmd, a depender de quais comandos foram recebidos. As tarefas 2, 3 e 4 foram implementadas dentro desta função.
+Na tarefa 2 foi utilizada a função execvp, que passa como parâmetro os argumentos do comando a ser executado como ponteiros de caracteres. Vale ressaltar que essa lista de argumentos é preenchida durante o bloco de parsecmd.
+Na tarefa 3 foram implementadas as soluções para os comandos de redirecionamento de entrada e saída ('>', '<') a partir do redircmd já construido. Antes de abrir o arquivo (comando open), como boa prática o descritor do arquivo é fechado (comando close) para poder ser reutilizado.
+    Na sequência, o arquivo em redircmd->file é aberto com a permissão S_IRWXU, que autoriza leitura, escrita, e pesquisa, ou execução, para o responsável pelo diretório. Todas essas permissões são essenciais para abranger todos os cenários possíveis.
+Por fim, na tarefa 4, implementou-se a estrutura de sequenciamento de comandos (pipes) em que os diversos comandos lidos no cmd são executados em sequência. A estrutura pipecmd armazena os lados esquerdo e direito de cada pipe, facilitando o processo de escrita. 
+    Foi necessário utilizar os comandos pipe (para criar o próprio canal de dados) e o fork (para criar novos processos através da duplicação do anterior). Ao trabalhar em cima de cada processo duplicado, os descritores dos comandos à esquerda e à direita precisam ser fechados para evitar erros no sistema.
+    A cada comando, vale ressaltar também que "runcmd" precisa ser chamado novamente para realizar as execuções cabíveis sobre o comando entre pipes.
